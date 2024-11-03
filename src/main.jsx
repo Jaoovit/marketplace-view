@@ -8,6 +8,7 @@ import './index.css'
 
 {/*JSX files*/}
 import App from './App.jsx'
+import Home from './pages/Home.jsx'
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -15,6 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route element={<App />}>
+        <Route path='/'element={<Home />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
