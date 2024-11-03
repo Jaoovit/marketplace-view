@@ -1,13 +1,22 @@
-// src/main.js or src/main.ts
+{/*React Hookes*/}
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-import './index.css';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+{/*Css*/}
+import './index.css'
+
+{/*JSX files*/}
+import App from './App.jsx'
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route element={<App />}>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>,
-);
-
+)
