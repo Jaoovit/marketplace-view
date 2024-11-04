@@ -1,19 +1,17 @@
-{/*JSX components*/}
-import NavBar from './components/NavBar'
-
-{/*Hook to navigate in the pages*/}
-import { Outlet } from 'react-router-dom'
-
-{/*Css*/}
-import './App.css'
+import { Outlet } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import { AuthProvider } from './context/AuthContext'; // Import the AuthProvider
+import './App.css';
 
 function App() {
-  return (
-    <div>
-      <NavBar />
-      <Outlet />
-    </div>
-  )
+    return (
+        <AuthProvider>
+            <div>
+                <NavBar />
+                <Outlet />
+            </div>
+        </AuthProvider>
+    );
 }
 
-export default App
+export default App;
