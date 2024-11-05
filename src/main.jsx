@@ -15,6 +15,7 @@ import Register from './pages/Register.jsx'
 import Login from './pages/Login.jsx'
 import GuestOnlyRoute from './components/GuestOnlyRoute.jsx'
 import Profile from './pages/Profile.jsx';
+import MyAdvertisements from './pages/MyAdvertisements.jsx';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -40,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                }
        />
        <Route path="/profile" element={<Profile />} />
+       <Route path="/my-advertisements" element={<MyAdvertisements />} />
         </Route>
       </Routes>
     </BrowserRouter>

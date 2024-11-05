@@ -1,16 +1,23 @@
-// src/pages/Profile.jsx
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
-    const { userId } = useAuth();
+    const { userId, isLoggedIn } = useAuth();
     const [user, setUser] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+
         const fetchUser = async () => {
             if (!userId) {
                 setError("User ID is missing.");
@@ -39,7 +46,7 @@ const Profile = () => {
         };
 
         fetchUser();
-    }, [userId]);
+    }, [userId, isLoggedIn, navigate]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -79,6 +86,7 @@ const Profile = () => {
 };
 
 export default Profile;
+
 
 
 
