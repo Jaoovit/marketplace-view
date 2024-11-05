@@ -1,10 +1,14 @@
 // Register.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const Register = () => {
+
+    const { isLoggedIn } = useAuth();
+
     const [formData, setFormData] = useState({
         username: "",
         name: "",
@@ -20,6 +24,12 @@ const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate("/");
+        }
+    }, [isLoggedIn, navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

@@ -17,18 +17,26 @@ const NavBar = () => {
                     Marketplace
                 </Link>
                 <div>
-                    {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            className="text-white bg-red-500 px-4 py-2 rounded hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
-                    ) : (
-                        <Link to="/login" className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
-                            Login
-                        </Link>
-                    )}
+                {isLoggedIn ? (
+                <div className='flex justify-between items-center gap-8'>
+                    <Link to="/profile" className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+                        Profile
+                    </Link>
+                    <Link to="/my-advertisements" className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+                        My Advertisements
+                    </Link>
+                    <button
+                        onClick={handleLogout}
+                        className="text-white bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+                    >
+                        Logout
+                    </button>
+                </div>
+                ) : (
+                    <Link to="/login" className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+                        Login
+                    </Link>
+                )}
                 </div>
             </div>
         </nav>

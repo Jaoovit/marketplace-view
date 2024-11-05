@@ -1,8 +1,9 @@
 // src/pages/Login.jsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5000/login', {
+            const response = await fetch(`${apiUrl}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -23,7 +24,7 @@ const Login = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                login(data.token);
+                login(data.token, data.user.id);
                 navigate('/');
             } else {
                 const errorData = await response.json();
@@ -69,5 +70,6 @@ const Login = () => {
 };
 
 export default Login;
+
 
 
