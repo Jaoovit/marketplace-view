@@ -1,5 +1,6 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext();
 
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await fetch('http://localhost:5000/logout', {
+            await fetch(`${apiUrl}/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });

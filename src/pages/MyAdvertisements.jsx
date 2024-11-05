@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -44,28 +44,55 @@ const MyAdvertisements = () => {
     return (
         <div className="container mx-auto p-4">
             <h2 className="text-3xl font-bold mb-4">My Advertisements</h2>
-            {advertisements.length === 0 ? (
-                <p>You have no advertisements.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link
+                to="/advertisement/new"
+                className="mb-4 inline-block px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
+            >
+                Add New Advertisement
+            </Link>
+
+            {advertisements.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {advertisements.map((ad) => (
-                        <div key={ad.id} className="border border-gray-300 p-4 rounded-md shadow-sm">
-                            <h3 className="text-xl font-semibold">{ad.title}</h3>
-                            <p className="text-gray-700">{ad.description}</p>
-                            {ad.images && ad.images.length > 0 && (
-                                <img
-                                    src={ad.images[0].url}
-                                    alt={ad.title}
-                                    className="mt-2 w-full h-48 object-cover rounded-md"
-                                />
-                            )}
+                        <div key={ad.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
+                            <div className="p-4">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-2">{ad.title}</h2>
+                                <div className="mb-4">
+                                    {ad.images && ad.images.length > 0 ? (
+                                        <img
+                                            src={ad.images[0].imageUrl}
+                                            alt={`Image for ad ${ad.id}`}
+                                            className="w-full h-48 object-cover rounded-md"
+                                        />
+                                    ) : (
+                                        <p className="text-gray-500">No images available</p>
+                                    )}
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                    Created on: {new Date(ad.createdAt).toLocaleDateString()}
+                                </p>
+                                <div className="text-center mt-4">
+                                    <Link
+                                        to={`/advertisement/${ad.id}`}
+                                        className="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                                    >
+                                        View Details
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
+            ) : (
+                <p className="text-gray-700 text-center">You have no advertisements.</p>
             )}
         </div>
     );
 };
 
 export default MyAdvertisements;
+
+
+
+
 
