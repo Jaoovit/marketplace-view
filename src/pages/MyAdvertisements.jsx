@@ -9,6 +9,7 @@ const MyAdvertisements = () => {
     const [advertisements, setAdvertisements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [editData, setEditData] = useState({ title: '', description: '' }); // For managing edit inputs
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -39,20 +40,41 @@ const MyAdvertisements = () => {
         }
     };
 
-    // Function to handle delete
-    const deleteAdvertisement = async (adId) => {
+    const updateAdvertisementTitle = async (adId) => {
         try {
-            const response = await fetch(`${apiUrl}/advertisement/${adId}/${userId}`, {
-                method: 'DELETE',
+            const response = await fetch(`${apiUrl}/advertisement/title/${adId}/${userId}`, {
+                method: 'PUT',
                 headers: {
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
+                body: JSON.stringify({ newTitle: editData.title }),
             });
 
-            if (!response.ok) throw new Error('Failed to delete advertisement');
+            if (!response.ok) throw new Error('Failed to update title');
 
-            // Refresh the list of advertisements after deleting
-            setAdvertisements(advertisements.filter(ad => ad.id !== adId));
+            await fetchAdvertisements();
+            setEditData({ ...editData, title: '' });
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const updateAdvertisementDescription = async (adId) => {
+        try {
+            const response = await fetch(`${apiUrl}/advertisement/description/${adId}/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify({ newDescription: editData.description }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update description');
+
+            await fetchAdvertisements();
+            setEditData({ ...editData, description: '' });
         } catch (err) {
             setError(err.message);
         }
@@ -77,6 +99,7 @@ const MyAdvertisements = () => {
                         <div key={ad.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
                             <div className="p-4">
                                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{ad.title}</h2>
+                                <h2 className="text-l text-gray-800 mb-2">{ad.description}</h2>
                                 <div className="mb-4">
                                     {ad.images && ad.images.length > 0 ? (
                                         <img
@@ -91,6 +114,36 @@ const MyAdvertisements = () => {
                                 <p className="text-sm text-gray-500">
                                     Created on: {new Date(ad.createdAt).toLocaleDateString()}
                                 </p>
+
+                                <div className="my-4">
+                                    <input
+                                        type="text"
+                                        placeholder="New Title"
+                                        value={editData.title}
+                                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                                        className="border p-2 mb-2 w-full rounded"
+                                    />
+                                    <button
+                                        onClick={() => updateAdvertisementTitle(ad.id)}
+                                        className="w-full px-4 py-2 mb-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                                    >
+                                        Update Title
+                                    </button>
+
+                                    <textarea
+                                        placeholder="New Description"
+                                        value={editData.description}
+                                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                                        className="border p-2 mb-2 w-full rounded"
+                                    />
+                                    <button
+                                        onClick={() => updateAdvertisementDescription(ad.id)}
+                                        className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                                    >
+                                        Update Description
+                                    </button>
+                                </div>
+
                                 <div className="text-center mt-4 flex justify-center gap-4">
                                     <Link
                                         to={`/advertisement/${ad.id}`}
@@ -98,12 +151,6 @@ const MyAdvertisements = () => {
                                     >
                                         View Details
                                     </Link>
-                                    <button
-                                        onClick={() => deleteAdvertisement(ad.id)}
-                                        className="inline-block px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
-                                    >
-                                        Delete
-                                    </button>
                                 </div>
                             </div>
                         </div>
