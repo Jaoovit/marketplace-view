@@ -15,28 +15,48 @@ const MyAdvertisements = () => {
         if (!isLoggedIn) {
             navigate('/login');
         } else {
-            const fetchAdvertisements = async () => {
-                try {
-                    const response = await fetch(`${apiUrl}/user/${userId}/advertisements`, {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('token')}`,
-                        },
-                    });
-
-                    if (!response.ok) throw new Error('Failed to fetch advertisements');
-
-                    const data = await response.json();
-                    setAdvertisements(data.advertisements);
-                } catch (err) {
-                    setError(err.message);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
             fetchAdvertisements();
         }
     }, [isLoggedIn, userId, navigate]);
+
+    const fetchAdvertisements = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${apiUrl}/user/${userId}/advertisements`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch advertisements');
+
+            const data = await response.json();
+            setAdvertisements(data.advertisements);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Function to handle delete
+    const deleteAdvertisement = async (adId) => {
+        try {
+            const response = await fetch(`${apiUrl}/advertisement/${adId}/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to delete advertisement');
+
+            // Refresh the list of advertisements after deleting
+            setAdvertisements(advertisements.filter(ad => ad.id !== adId));
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
@@ -71,13 +91,19 @@ const MyAdvertisements = () => {
                                 <p className="text-sm text-gray-500">
                                     Created on: {new Date(ad.createdAt).toLocaleDateString()}
                                 </p>
-                                <div className="text-center mt-4">
+                                <div className="text-center mt-4 flex justify-center gap-4">
                                     <Link
                                         to={`/advertisement/${ad.id}`}
                                         className="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
                                     >
                                         View Details
                                     </Link>
+                                    <button
+                                        onClick={() => deleteAdvertisement(ad.id)}
+                                        className="inline-block px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -91,7 +117,6 @@ const MyAdvertisements = () => {
 };
 
 export default MyAdvertisements;
-
 
 
 
