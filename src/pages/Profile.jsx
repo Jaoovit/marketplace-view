@@ -10,6 +10,10 @@ const Profile = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const [newLocation, setNewLocation] = useState('');
+    const [newDescription, setNewDescription] = useState('');
+    const [newProfileImage, setNewProfileImage] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,6 +52,79 @@ const Profile = () => {
         fetchUser();
     }, [userId, isLoggedIn, navigate]);
 
+    // Function to handle location update
+    const updateLocation = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/location/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ newLocation }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update location');
+            
+            const data = await response.json();
+            setUser((prevUser) => ({ ...prevUser, location: data.updatedLocation }));
+            setNewLocation(''); // Clear the input
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    // Function to handle description update
+    const updateDescription = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/description/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ newDescription }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update description');
+
+            const data = await response.json();
+            setUser((prevUser) => ({ ...prevUser, description: data.updatedDescription }));
+            setNewDescription(''); // Clear the input
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    // Function to handle profile image update
+    const updateProfileImage = async () => {
+        if (!newProfileImage) {
+            setError('Please select an image to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('profileImage', newProfileImage);
+
+        try {
+            const response = await fetch(`${apiUrl}/profileImage/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Failed to update profile image');
+
+            const data = await response.json();
+            setUser((prevUser) => ({ ...prevUser, profileImage: data.updatedProfileImage }));
+            setNewProfileImage(null); // Clear the file input
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -81,11 +158,60 @@ const Profile = () => {
             <p><strong>Profession:</strong> {user.profession}</p>
             <p><strong>Location:</strong> {user.location}</p>
             <p><strong>Description:</strong> {user.description}</p>
+
+            {/* Update Location */}
+            <div className="mt-4">
+                <input
+                    type="text"
+                    placeholder="New Location"
+                    value={newLocation}
+                    onChange={(e) => setNewLocation(e.target.value)}
+                    className="border p-2 mb-2 w-full rounded"
+                />
+                <button
+                    onClick={updateLocation}
+                    className="w-full px-4 py-2 mb-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                >
+                    Update Location
+                </button>
+            </div>
+
+            {/* Update Description */}
+            <div className="mt-4">
+                <textarea
+                    placeholder="New Description"
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    className="border p-2 mb-2 w-full rounded"
+                />
+                <button
+                    onClick={updateDescription}
+                    className="w-full px-4 py-2 mb-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                >
+                    Update Description
+                </button>
+            </div>
+
+            {/* Update Profile Image */}
+            <div className="mt-4">
+                <input
+                    type="file"
+                    onChange={(e) => setNewProfileImage(e.target.files[0])}
+                    className="mb-2"
+                />
+                <button
+                    onClick={updateProfileImage}
+                    className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                >
+                    Update Profile Image
+                </button>
+            </div>
         </div>
     );
 };
 
 export default Profile;
+
 
 
 
