@@ -9,7 +9,9 @@ const MyAdvertisements = () => {
     const [advertisements, setAdvertisements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [editData, setEditData] = useState({ title: '', description: '' }); // For managing edit inputs
+    const [editData, setEditData] = useState({ title: '', description: '' });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -80,8 +82,40 @@ const MyAdvertisements = () => {
         }
     };
 
+    const handleImageUpload = async (adId) => {
+        if (!selectedFile) {
+            setError('Please select an image.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+
+        setUploading(true);
+
+        try {
+            const response = await fetch(`${apiUrl}/advertisement/${adId}/images/${userId}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error('Failed to upload image.');
+
+            await fetchAdvertisements();
+            setSelectedFile(null);
+            setError('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
-    if (error) return <div className="text-red-500">{error}</div>;
+    if (error) return <div className="text-red-500 my-4">{error}</div>;
 
     return (
         <div className="container mx-auto p-4">
@@ -99,7 +133,7 @@ const MyAdvertisements = () => {
                         <div key={ad.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
                             <div className="p-4">
                                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{ad.title}</h2>
-                                <h2 className="text-l text-gray-800 mb-2">{ad.description}</h2>
+                                <p className="text-gray-800 mb-2">{ad.description}</p>
                                 <div className="mb-4">
                                     {ad.images && ad.images.length > 0 ? (
                                         <img
@@ -111,9 +145,6 @@ const MyAdvertisements = () => {
                                         <p className="text-gray-500">No images available</p>
                                     )}
                                 </div>
-                                <p className="text-sm text-gray-500">
-                                    Created on: {new Date(ad.createdAt).toLocaleDateString()}
-                                </p>
 
                                 <div className="my-4">
                                     <input
@@ -144,6 +175,21 @@ const MyAdvertisements = () => {
                                     </button>
                                 </div>
 
+                                <div className="my-4">
+                                    <input
+                                        type="file"
+                                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                                        className="block w-full mb-2"
+                                    />
+                                    <button
+                                        onClick={() => handleImageUpload(ad.id)}
+                                        className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
+                                        disabled={error || !selectedFile || uploading}
+                                    >
+                                        {uploading ? 'Uploading...' : 'Add Image'}
+                                    </button>
+                                </div>
+
                                 <div className="text-center mt-4 flex justify-center gap-4">
                                     <Link
                                         to={`/advertisement/${ad.id}`}
@@ -164,6 +210,8 @@ const MyAdvertisements = () => {
 };
 
 export default MyAdvertisements;
+
+
 
 
 
