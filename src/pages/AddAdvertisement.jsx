@@ -42,7 +42,7 @@ const AddAdvertisement = () => {
             throw new Error(errorData.message || 'Failed to create advertisement');
           }
       
-          navigate('/my-advertisements');
+          navigate(`/user/${userId}`);
         } catch (err) {
           setError(err.message);
         }

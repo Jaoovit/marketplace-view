@@ -1,14 +1,19 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AdvertisementDetails = () => {
   const { id } = useParams();
+  const { userId, isLoggedIn } = useAuth();
   const [ad, setAd] = useState(null);
   const [user, setUser] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [editData, setEditData] = useState({ title: '', description: '' });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchAdDetails = async () => {
@@ -30,15 +35,120 @@ const AdvertisementDetails = () => {
     fetchAdDetails();
   }, [id]);
 
+  const updateAdvertisementTitle = async (adId) => {
+    try {
+      const response = await fetch(`${apiUrl}/advertisement/title/${adId}/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ newTitle: editData.title }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update title');
+
+      // Update the title in the local state immediately
+      setAd((prevAd) => ({ ...prevAd, title: editData.title }));
+      setEditData({ ...editData, title: '' });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const updateAdvertisementDescription = async (adId) => {
+    try {
+      const response = await fetch(`${apiUrl}/advertisement/description/${adId}/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ newDescription: editData.description }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update description');
+
+      // Update the description in the local state immediately
+      setAd((prevAd) => ({ ...prevAd, description: editData.description }));
+      setEditData({ ...editData, description: '' });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleImageUpload = async (adId) => {
+    if (!selectedFile) {
+      setError('Please select an image.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    setAdding(true);
+
+    try {
+      const response = await fetch(`${apiUrl}/advertisement/${adId}/images/${userId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Failed to upload image.');
+
+      // Reload the page after successful image upload
+      window.location.reload();
+
+      setSelectedFile(null);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const deleteAdvertisement = async () => {
+    if (window.confirm("Are you sure you want to delete this advertisement?")) {
+      try {
+        const response = await fetch(`${apiUrl}/advertisement/${ad.id}/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to delete advertisement');
+
+        // After successful deletion, redirect the user
+        window.location.href = '/';  // Redirect to homepage or ads listing
+      } catch (error) {
+        console.error('Error deleting advertisement:', error);
+        alert('Error deleting advertisement.');
+      }
+    }
+  };
+
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === ad.images.length - 1 ? 0 : prevIndex + 1
+      ad.images && ad.images.length > 0
+        ? prevIndex === ad.images.length - 1
+          ? 0
+          : prevIndex + 1
+        : 0
     );
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? ad.images.length - 1 : prevIndex - 1
+      ad.images && ad.images.length > 0
+        ? prevIndex === 0
+          ? ad.images.length - 1
+          : prevIndex - 1
+        : 0
     );
   };
 
@@ -53,7 +163,7 @@ const AdvertisementDetails = () => {
         {ad.images && ad.images.length > 0 && (
           <div className="relative mb-8">
             <img
-              src={ad.images[currentImageIndex].imageUrl}
+              src={ad.images[currentImageIndex]?.imageUrl || ''}
               alt={`Image ${currentImageIndex + 1} for ad ${ad.id}`}
               className="w-full h-80 object-cover rounded-md transition-opacity duration-500 ease-in-out"
             />
@@ -69,22 +179,72 @@ const AdvertisementDetails = () => {
             >
               ►
             </button>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+
+            {/* Circle indicators */}
+            <div className="flex justify-center mt-4 space-x-2">
               {ad.images.map((_, index) => (
-                <span
+                <div
                   key={index}
-                  className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                    index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-400'
+                  className={`w-3 h-3 rounded-full ${
+                    currentImageIndex === index ? "bg-blue-500" : "bg-gray-300"
                   }`}
-                ></span>
+                ></div>
               ))}
             </div>
           </div>
         )}
 
-        <p className="text-sm text-gray-500">
-          Created on: {new Date(ad.createdAt).toLocaleDateString()}
-        </p>
+        {isLoggedIn && ad.userId === userId && (
+          <div className="mt-4">
+            <input
+              type="text"
+              placeholder="New Title"
+              value={editData.title}
+              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+              className="border p-2 mb-2 w-full rounded"
+            />
+            <button
+              onClick={() => updateAdvertisementTitle(ad.id)}
+              className="w-full px-4 py-2 mb-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Update Title
+            </button>
+
+            <textarea
+              placeholder="New Description"
+              value={editData.description}
+              onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+              className="border p-2 mb-2 w-full rounded"
+            />
+            <button
+              onClick={() => updateAdvertisementDescription(ad.id)}
+              className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Update Description
+            </button>
+
+            <input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              className="block w-full mb-2"
+            />
+            <button
+              onClick={() => handleImageUpload(ad.id)}
+              className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
+              disabled={error || !selectedFile || adding}
+            >
+              {adding ? 'Adding Image...' : 'Add Image'}
+            </button>
+
+            {/* Delete Button */}
+            <button
+              onClick={deleteAdvertisement}
+              className="w-full px-4 py-2 mt-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
+            >
+              Delete Advertisement
+            </button>
+          </div>
+        )}
 
         {user && (
           <div className="mt-6 border-t pt-4">
@@ -109,5 +269,7 @@ const AdvertisementDetails = () => {
 };
 
 export default AdvertisementDetails;
+
+
 
 
