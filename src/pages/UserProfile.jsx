@@ -11,8 +11,6 @@ const UserProfile = () => {
     const [ads, setAds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // State variables for update functionalities
     const [newLocation, setNewLocation] = useState('');
     const [newDescription, setNewDescription] = useState('');
     const [newProfileImage, setNewProfileImage] = useState(null);
@@ -53,7 +51,6 @@ const UserProfile = () => {
         fetchUserProfileAndAds();
     }, [id]);
 
-    // Function to handle location update
     const updateLocation = async () => {
         if (!newLocation.trim()) {
             setError('Location cannot be empty.');
@@ -75,7 +72,7 @@ const UserProfile = () => {
 
             const data = await response.json();
             setUser((prevUser) => ({ ...prevUser, location: data.updatedLocation }));
-            setNewLocation(''); // Clear the input
+            setNewLocation('');
             setError('');
         } catch (err) {
             setError(err.message);
@@ -84,7 +81,6 @@ const UserProfile = () => {
         }
     };
 
-    // Function to handle description update
     const updateDescription = async () => {
         if (!newDescription.trim()) {
             setError('Description cannot be empty.');
@@ -106,7 +102,7 @@ const UserProfile = () => {
 
             const data = await response.json();
             setUser((prevUser) => ({ ...prevUser, description: data.updatedDescription }));
-            setNewDescription(''); // Clear the input
+            setNewDescription('');
             setError('');
         } catch (err) {
             setError(err.message);
@@ -115,7 +111,6 @@ const UserProfile = () => {
         }
     };
 
-    // Function to handle profile image update
     const updateProfileImage = async () => {
         if (!newProfileImage) {
             setError('Please select an image to upload.');
@@ -139,7 +134,7 @@ const UserProfile = () => {
 
             const data = await response.json();
             setUser((prevUser) => ({ ...prevUser, profileImage: data.updatedProfileImage }));
-            setNewProfileImage(null); // Clear the file input
+            setNewProfileImage(null);
             setError('');
         } catch (err) {
             setError(err.message);
@@ -148,7 +143,6 @@ const UserProfile = () => {
         }
     };
 
-    // Function to handle deleting an advertisement
     const deleteAdvertisement = async (adId) => {
         try {
             const response = await fetch(`${apiUrl}/advertisement/${adId}/${loggedInUserId}`, {
@@ -159,7 +153,6 @@ const UserProfile = () => {
             });
 
             if (!response.ok) throw new Error('Failed to delete advertisement');
-            // Remove the ad from the state after successful deletion
             setAds(ads.filter((ad) => ad.id !== adId));
             setError('');
         } catch (err) {
@@ -194,12 +187,10 @@ const UserProfile = () => {
                 <p className="text-gray-700 mb-2"><strong>Location:</strong> {user.location}</p>
                 <p className="text-gray-700 mb-2"><strong>Joined on:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
 
-                {/* Conditional Rendering for Update Forms */}
                 {isLoggedIn && parseInt(id, 10) === loggedInUserId && (
                     <div className="mt-6 border-t pt-4">
                         <h3 className="text-xl font-semibold text-gray-800 mb-4">Edit Profile</h3>
 
-                        {/* Update Location */}
                         <div className="mb-4">
                             <input
                                 type="text"
@@ -217,7 +208,6 @@ const UserProfile = () => {
                             </button>
                         </div>
 
-                        {/* Update Description */}
                         <div className="mb-4">
                             <textarea
                                 placeholder="New Description"
@@ -234,7 +224,6 @@ const UserProfile = () => {
                             </button>
                         </div>
 
-                        {/* Update Profile Image */}
                         <div className="mb-4">
                             <input
                                 type="file"
@@ -256,7 +245,7 @@ const UserProfile = () => {
 
             <div className="mt-6">
                 <h3 className="text-2xl font-semibold">Advertisements</h3>
-                {/* Only show the "Add New Advertisement" link if the logged-in user matches the profile being viewed */}
+
                 {isLoggedIn && parseInt(id, 10) === loggedInUserId && (
                     <Link
                         to="/advertisement/new"
@@ -282,7 +271,7 @@ const UserProfile = () => {
                                         <p className="text-gray-500 mb-4">No images available</p>
                                     )}
                                     <p className="text-sm text-gray-500">Created on: {new Date(ad.createdAt).toLocaleDateString()}</p>
-                                    {/* Delete button */}
+
                                     {isLoggedIn && parseInt(id, 10) === loggedInUserId && (
                                         <button
                                             onClick={() => deleteAdvertisement(ad.id)}

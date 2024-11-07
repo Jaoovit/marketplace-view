@@ -35,6 +35,24 @@ const AdvertisementDetails = () => {
     fetchAdDetails();
   }, [id]);
 
+  const deleteImage = async (imageId) => {
+    if (window.confirm("Are you sure you want to delete this image?")) {
+      try {
+        const response = await fetch(`${apiUrl}/advertisement/image/${imageId}/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (!response.ok) throw new Error('Failed to delete image');
+        window.location.reload();
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+  
+
   const updateAdvertisementTitle = async (adId) => {
     try {
       const response = await fetch(`${apiUrl}/advertisement/title/${adId}/${userId}`, {
@@ -48,7 +66,6 @@ const AdvertisementDetails = () => {
 
       if (!response.ok) throw new Error('Failed to update title');
 
-      // Update the title in the local state immediately
       setAd((prevAd) => ({ ...prevAd, title: editData.title }));
       setEditData({ ...editData, title: '' });
     } catch (err) {
@@ -69,7 +86,6 @@ const AdvertisementDetails = () => {
 
       if (!response.ok) throw new Error('Failed to update description');
 
-      // Update the description in the local state immediately
       setAd((prevAd) => ({ ...prevAd, description: editData.description }));
       setEditData({ ...editData, description: '' });
     } catch (err) {
@@ -99,7 +115,6 @@ const AdvertisementDetails = () => {
 
       if (!response.ok) throw new Error('Failed to upload image.');
 
-      // Reload the page after successful image upload
       window.location.reload();
 
       setSelectedFile(null);
@@ -123,8 +138,7 @@ const AdvertisementDetails = () => {
 
         if (!response.ok) throw new Error('Failed to delete advertisement');
 
-        // After successful deletion, redirect the user
-        window.location.href = '/';  // Redirect to homepage or ads listing
+        window.location.href = '/';
       } catch (error) {
         console.error('Error deleting advertisement:', error);
         alert('Error deleting advertisement.');
@@ -180,15 +194,26 @@ const AdvertisementDetails = () => {
               ►
             </button>
 
-            {/* Circle indicators */}
+            {ad.userId === userId && (
+              <div className="absolute top-0 right-0 p-2">
+                <button
+                  onClick={() => deleteImage(ad.images[currentImageIndex].id)}
+                  className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-300"
+                >
+                  X
+                </button>
+              </div>
+            )}
+
             <div className="flex justify-center mt-4 space-x-2">
-              {ad.images.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-3 h-3 rounded-full ${
-                    currentImageIndex === index ? "bg-blue-500" : "bg-gray-300"
-                  }`}
-                ></div>
+              {ad.images.map((image, index) => (
+                <div key={index} className="relative">
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      currentImageIndex === index ? 'bg-blue-500' : 'bg-gray-300'
+                    }`}
+                  ></div>
+                </div>
               ))}
             </div>
           </div>
@@ -205,7 +230,7 @@ const AdvertisementDetails = () => {
             />
             <button
               onClick={() => updateAdvertisementTitle(ad.id)}
-              className="w-full px-4 py-2 mb-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+              className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
             >
               Update Title
             </button>
@@ -236,7 +261,6 @@ const AdvertisementDetails = () => {
               {adding ? 'Adding Image...' : 'Add Image'}
             </button>
 
-            {/* Delete Button */}
             <button
               onClick={deleteAdvertisement}
               className="w-full px-4 py-2 mt-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
@@ -269,7 +293,5 @@ const AdvertisementDetails = () => {
 };
 
 export default AdvertisementDetails;
-
-
 
 
