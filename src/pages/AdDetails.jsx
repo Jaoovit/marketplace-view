@@ -51,7 +51,6 @@ const AdvertisementDetails = () => {
       }
     }
   };
-  
 
   const updateAdvertisementTitle = async (adId) => {
     try {
@@ -113,12 +112,15 @@ const AdvertisementDetails = () => {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Failed to upload image.');
-
-      window.location.reload();
-
-      setSelectedFile(null);
-      setError('');
+      if (response.status === 401) {
+        setError('You can add only 5 images for this advertisement.');
+      } else if (!response.ok) {
+        throw new Error('Failed to upload image.');
+      } else {
+        window.location.reload();
+        setSelectedFile(null);
+        setError('');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -173,6 +175,8 @@ const AdvertisementDetails = () => {
       <div className="bg-white shadow-lg rounded-lg overflow-hidden p-6">
         <h2 className="text-3xl font-bold text-gray-800 mb-4">{ad.title}</h2>
         <p className="text-gray-700 mb-6">{ad.description}</p>
+
+        {error && <p className="text-red-500">{error}</p>}
 
         {ad.images && ad.images.length > 0 && (
           <div className="relative mb-8">
@@ -243,7 +247,7 @@ const AdvertisementDetails = () => {
             />
             <button
               onClick={() => updateAdvertisementDescription(ad.id)}
-              className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+              className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
             >
               Update Description
             </button>
@@ -251,19 +255,19 @@ const AdvertisementDetails = () => {
             <input
               type="file"
               onChange={(e) => setSelectedFile(e.target.files[0])}
-              className="block w-full mb-2"
+              className="mt-4"
             />
             <button
               onClick={() => handleImageUpload(ad.id)}
-              className="w-full px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
-              disabled={error || !selectedFile || adding}
+              className="w-full px-4 py-2 bg-purple-500 text-white font-semibold rounded-md hover:bg-purple-600 transition duration-300 mt-2"
+              disabled={adding}
             >
-              {adding ? 'Adding Image...' : 'Add Image'}
+              {adding ? 'Uploading...' : 'Add Image'}
             </button>
 
             <button
               onClick={deleteAdvertisement}
-              className="w-full px-4 py-2 mt-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
+              className="w-full px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300 mt-4"
             >
               Delete Advertisement
             </button>
@@ -271,20 +275,11 @@ const AdvertisementDetails = () => {
         )}
 
         {user && (
-          <div className="mt-6 border-t pt-4">
-            <h3 className="text-xl font-semibold text-gray-800">Posted by</h3>
-            <p className="text-gray-700">Name: {user.name}</p>
-            <p className="text-gray-700">Email: {user.email}</p>
-            <p className="text-gray-700">Phone number: {user.phone}</p>
-            <p className="text-gray-700">Location: {user.location}</p>
-            <div className="text-center mt-4">
-              <Link
-                to={`/user/${user.id}`}
-                className="inline-block px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
-              >
-                View User
-              </Link>
-            </div>
+          <div className="mt-4">
+            <h3 className="text-lg font-bold">Seller:</h3>
+            <Link to={`/user/${user.id}`} className="text-blue-500">
+              {user.name}
+            </Link>
           </div>
         )}
       </div>
