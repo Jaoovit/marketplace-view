@@ -1,4 +1,3 @@
-// src/pages/AddAdvertisement.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext'; 
 import { useNavigate } from 'react-router-dom';
@@ -39,10 +38,14 @@ const AddAdvertisement = () => {
       
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to create advertisement');
+            if (errorData.message === "You can't create more them 5 advertisements") {
+              setError("You have reached the maximum number of advertisements allowed.");
+            } else {
+              throw new Error(errorData.message || 'Failed to create advertisement');
+            }
+          } else {
+            navigate(`/user/${userId}`);
           }
-      
-          navigate(`/user/${userId}`);
         } catch (err) {
           setError(err.message);
         }
@@ -98,10 +101,3 @@ const AddAdvertisement = () => {
 };
 
 export default AddAdvertisement;
-
-
-
-
-
-
-

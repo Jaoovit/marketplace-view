@@ -293,5 +293,3 @@ const AdvertisementDetails = () => {
 };
 
 export default AdvertisementDetails;
-
-
