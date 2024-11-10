@@ -14,7 +14,8 @@ import UserProfile from './pages/UserProfile.jsx'
 import Register from './pages/Register.jsx'
 import Login from './pages/Login.jsx'
 import GuestOnlyRoute from './components/GuestOnlyRoute.jsx'
-import AddAdvertisement from './pages/AddAdvertisement';
+import AddAdvertisement from './pages/AddAdvertisement.jsx'
+import Search from './pages/Search.jsx'
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -40,7 +41,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                }
        />
        <Route path="/advertisement/new" element={<AddAdvertisement />} />
-        </Route>
+       <Route path="/search" element={<Search />}></Route>
+       </Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

@@ -1,13 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const NavBar = () => {
     const { isLoggedIn, logout, userId } = useAuth();
     const navigate = useNavigate();
+    const [query, setQuery] = useState("");
 
     const handleLogout = async () => {
         await logout();
         navigate('/');
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (!query) return
+        navigate(`/search?query=${query}`)
+        setQuery("")
     };
 
     return (
@@ -16,11 +25,29 @@ const NavBar = () => {
                 <Link to="/" className="text-white text-lg font-semibold">
                     Marketplace
                 </Link>
+
+                {/* Search Bar */}
+                <form onSubmit={handleSearchSubmit} className="flex items-center">
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search ads..."
+                        className="p-2 rounded-l-md text-black"
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
+                    >
+                        Search
+                    </button>
+                </form>
+
                 <div>
                     {isLoggedIn ? (
                         <div className="flex justify-between items-center gap-8">
                             <Link
-                                to={`/user/${userId}`}  // Dynamic link to the user's profile
+                                to={`/user/${userId}`}
                                 className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
                             >
                                 Profile
@@ -44,7 +71,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-
-
-
-
